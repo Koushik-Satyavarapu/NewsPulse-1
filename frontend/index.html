@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NewsPulse - Premium AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              news: {
+                sidebarBg: '#111827',
+                bg: '#F1F5F9',
+                card: '#FFFFFF',
+                primary: '#5B21B6',
+                primaryHover: '#4C1D95',
+                accent: '#F59E0B',
+                darkText: '#0F172A',
+                lightText: '#475569',
+                border: '#CBD5E1',
+                success: '#16A34A',
+                negative: '#DC2626',
+                neutral: '#64748B',
+                sidebarActive: '#7C3AED',
+                headerBg: '#FFFFFF',
+                chart1: '#7C3AED',
+                chart2: '#06B6D4',
+                chart3: '#F59E0B',
+                chart4: '#10B981',
+                chart5: '#EF4444'
+              }
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-news-bg text-news-darkText min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
