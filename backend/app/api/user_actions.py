@@ -1,7 +1,5 @@
-// frontend/src/services/api.ts
 import axios from 'axios';
 
-// Point directly to your live Render backend URL
 const API_BASE_URL = 'https://newspulse-1-ane6.onrender.com'; 
 
 const api = axios.create({
@@ -35,47 +33,56 @@ export const registerUser = async (credentials: any) => {
   return response.data;
 };
 
-// --- CORRECTED PROFILE PATHS ---
+// --- PROFILE PATHS ---
 export const getProfile = async () => {
-  const response = await api.get('/profile'); // Fixed: Removed /users
+  const response = await api.get('/profile'); 
   return response.data;
 };
 
 export const updateProfile = async (data: any) => {
-  const response = await api.put('/profile/update', data); // Fixed: Added /update
+  const response = await api.put('/profile/update', data); 
   return response.data;
 };
 
-// --- CORRECTED PREFERENCES PATHS ---
+// --- PREFERENCES PATHS ---
 export const getPreferences = async () => {
-  const response = await api.get('/preferences'); // Fixed: Removed /users
+  const response = await api.get('/preferences'); 
   return response.data;
 };
 
 export const updatePreferences = async (data: any) => {
-  const response = await api.put('/preferences', data); // Fixed: Removed /users
+  const response = await api.put('/preferences', data); 
   return response.data;
 };
 
-// --- CORRECTED BOOKMARKS PATHS ---
+// --- BOOKMARKS PATHS ---
 export const getBookmarks = async () => {
-  const response = await api.get('/bookmarks/user'); // Fixed: Pointed to /bookmarks/user
+  const response = await api.get('/bookmarks/user'); 
   return response.data;
 };
 
+// FIXED: Formats the article payload to match your backend Pydantic schema precisely
 export const saveBookmark = async (article: any) => {
-  const response = await api.post('/bookmarks/add', article); // Fixed: Pointed to /bookmarks/add
+  const cleanedPayload = {
+    title: article.title || 'Untitled',
+    description: article.description || 'No description available.',
+    url: article.url,
+    publishedAt: article.publishedAt || new Date().toISOString(),
+    source: typeof article.source === 'object' ? (article.source?.name || 'Unknown Source') : String(article.source || 'Unknown'),
+    sentiment: article.sentiment || 'Neutral'
+  };
+
+  const response = await api.post('/bookmarks/add', cleanedPayload); 
   return response.data;
 };
 
 export const removeBookmark = async (url: string) => {
-  // Fixed: Passed url as a query param or request configuration to match backend delete endpoint
   const response = await api.delete('/bookmarks/remove', { params: { url } }); 
   return response.data;
 };
 
-// --- CORRECTED RECENT ACTIVITY HISTORY PATH ---
+// --- RECENT ACTIVITY HISTORY PATH ---
 export const getHistory = async () => {
-  const response = await api.get('/news/history'); // Fixed: Prefixed with /news to match news.py
+  const response = await api.get('/news/history'); 
   return response.data;
 };
