@@ -20,58 +20,60 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ... rest of your existing API functions continue exactly the same below ...
 export const searchNews = async (query: any) => {
-  const response = await api.post('/api/news/search', query);
+  // Removed /api -> Now matches backend news router prefix
+  const response = await api.post('/news/search', query); 
   return response.data;
 };
 
 export const loginUser = async (credentials: any) => {
-  const response = await api.post('/api/auth/login', credentials);
+  // Removed /api -> Now matches backend /auth/login
+  const response = await api.post('/auth/login', credentials);
   return response.data;
 };
 
 export const registerUser = async (credentials: any) => {
-  const response = await api.post('/api/auth/register', credentials);
+  // Removed /api -> Now matches backend /auth/register
+  const response = await api.post('/auth/register', credentials);
   return response.data;
 };
 
 export const getProfile = async () => {
-  const response = await api.get('/api/users/profile');
+  const response = await api.get('/users/profile');
   return response.data;
 };
 
 export const updateProfile = async (data: any) => {
-  const response = await api.put('/api/users/profile', data);
+  const response = await api.put('/users/profile', data);
   return response.data;
 };
 
 export const getPreferences = async () => {
-  const response = await api.get('/api/users/preferences');
+  const response = await api.get('/users/preferences');
   return response.data;
 };
 
 export const updatePreferences = async (data: any) => {
-  const response = await api.put('/api/users/preferences', data);
+  const response = await api.put('/users/preferences', data);
   return response.data;
 };
 
 export const getBookmarks = async () => {
-  const response = await api.get('/api/bookmarks');
+  const response = await api.get('/bookmarks');
   return response.data;
 };
 
 export const saveBookmark = async (article: any) => {
-  const response = await api.post('/api/bookmarks', article);
+  const response = await api.post('/bookmarks', article);
   return response.data;
 };
 
 export const removeBookmark = async (url: string) => {
-  const response = await api.delete('/api/bookmarks', { data: { url } });
+  const response = await api.delete('/bookmarks', { data: { url } });
   return response.data;
 };
 
 export const getHistory = async () => {
-  const response = await api.get('/api/history');
+  const response = await api.get('/history');
   return response.data;
 };
