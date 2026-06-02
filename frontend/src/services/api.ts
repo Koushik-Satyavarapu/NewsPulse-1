@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Point directly to your live Render backend URL
 const API_BASE_URL = 'https://newspulse-1-ane6.onrender.com'; 
 
 const api = axios.create({
@@ -10,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Automatically inject your token into cloud requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('news_pulse_session');
   if (token && config.headers) {
@@ -19,7 +17,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// FIXED: Converted from .post to .get to line up with the backend router
 export const searchNews = async (query: any) => {
   const response = await api.get('/news/search', { params: query }); 
   return response.data;
@@ -36,7 +33,7 @@ export const registerUser = async (credentials: any) => {
 };
 
 export const getProfile = async () => {
-  const response = await api.get('/users/profile');
+  const response = await api.get('/users/profile'); // Ensure NO trailing slash here!
   return response.data;
 };
 

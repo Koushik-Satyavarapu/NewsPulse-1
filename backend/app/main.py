@@ -10,15 +10,17 @@ from app.api.news import router as news_router
 from app.api.auth import router as auth_router
 from app.api.user_actions import router as user_router
 
-app = FastAPI(title="NewsPulse - AI News Trend Analyzer")
+# ADD THIS: redirect_slashes=False stops FastAPI from stripping headers on minor URL mismatches
+app = FastAPI(title="NewsPulse - AI News Trend Analyzer", redirect_slashes=False)
 
-# FIXED: Using regex ensures every current and future Vercel deployment link works perfectly
+# FIXED: Comprehensive wildcard handling for all headers and origins
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"https://news-pulse-1-.*\.vercel\.app|http://localhost:5173|http://127.0.0.1:5173",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],  # Explicitly exposes headers back to Vercel
 )
 
 app.include_router(auth_router)
