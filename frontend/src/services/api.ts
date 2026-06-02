@@ -1,8 +1,8 @@
+// frontend/src/services/api.ts
 import axios from 'axios';
 
-// 1. CHANGE THIS LINE: Replace localhost with your actual live Render Web Service URL!
-// It usually looks like: https://your-service-name.onrender.com
-const API_BASE_URL = 'https://newspulse-backend.onrender.com'; 
+// Update this line to point to your brand new live backend URL!
+const API_BASE_URL = 'https://newspulse-1-ane6.onrender.com'; 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
