@@ -1,3 +1,8 @@
+import nltk
+try:
+    nltk.data.find('sentiment/vader_lexicon.zip')
+except LookupError:
+    nltk.download('vader_lexicon', quiet=True)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.news import router as news_router
