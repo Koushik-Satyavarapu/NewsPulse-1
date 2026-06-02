@@ -1,7 +1,6 @@
-// frontend/src/services/api.ts
 import axios from 'axios';
 
-// Update this line to point to your brand new live backend URL!
+// Point directly to your live Render backend URL
 const API_BASE_URL = 'https://newspulse-1-ane6.onrender.com'; 
 
 const api = axios.create({
@@ -20,20 +19,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// FIXED: Converted from .post to .get to line up with the backend router
 export const searchNews = async (query: any) => {
-  // Removed /api -> Now matches backend news router prefix
-  const response = await api.post('/news/search', query); 
+  const response = await api.get('/news/search', { params: query }); 
   return response.data;
 };
 
 export const loginUser = async (credentials: any) => {
-  // Removed /api -> Now matches backend /auth/login
   const response = await api.post('/auth/login', credentials);
   return response.data;
 };
 
 export const registerUser = async (credentials: any) => {
-  // Removed /api -> Now matches backend /auth/register
   const response = await api.post('/auth/register', credentials);
   return response.data;
 };

@@ -12,10 +12,10 @@ from app.api.user_actions import router as user_router
 
 app = FastAPI(title="NewsPulse - AI News Trend Analyzer")
 
-# FIXED: Replaced allow_origins with allow_origin_regex to handle all Vercel URLs
+# FIXED: Using regex ensures every current and future Vercel deployment link works perfectly
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://news-pulse-1-.*.vercel.app|http://localhost:5173|http://127.0.0.1:5173",
+    allow_origin_regex=r"https://news-pulse-1-.*\.vercel\.app|http://localhost:5173|http://127.0.0.1:5173",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
