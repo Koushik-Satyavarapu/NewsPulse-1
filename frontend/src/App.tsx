@@ -10,8 +10,7 @@ import {
   Newspaper, 
   FolderOpen, 
   Menu, 
-  X,
-  UserCheck
+  X
 } from 'lucide-react';
 import SearchPanel from './components/SearchPanel';
 import TrendList from './components/TrendList';
@@ -52,7 +51,7 @@ function ProtectedRoute({ isAuthenticated, onRedirect, children }: ProtectedRout
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('search');
+  const [currentPage, setCurrentPage] = useState<Page>('home');
   const [articles, setArticles] = useState<any[]>([]);
   const [trending, setTrending] = useState<string[]>([]);
   const [sentiments, setSentiments] = useState({ Positive: 0, Neutral: 0, Negative: 0 });
@@ -76,7 +75,6 @@ function App() {
   const [prefKeywords, setPrefKeywords] = useState('');
   const [searchHistory, setSearchHistory] = useState<any[]>([]);
 
-  // Mobile Navigation Responsive State Hooks
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -85,13 +83,19 @@ function App() {
     }
   }, [isAuthenticated]);
 
-  // Handle history fetching context smoothly on Tab changes
   useEffect(() => {
     if (currentPage === 'home' && isAuthenticated) {
       getHistory().then(data => setSearchHistory(data || [])).catch(err => console.error(err));
     }
-    // Auto-collapse responsive drawer menu overlay instantly whenever user updates their location selection
     setIsSidebarOpen(false);
+  }, [currentPage]);
+
+  // UX FIX 2 — AUTO-SCROLL TO TOP ON PAGE CHANGE
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   }, [currentPage]);
 
   const syncUserData = async () => {
@@ -127,7 +131,7 @@ function App() {
       localStorage.setItem("news_pulse_user", res.username);
       setUsername(res.username);
       setIsAuthenticated(true);
-      setCurrentPage('search');
+      setCurrentPage('home');
     } catch (err: any) {
       alert(err.response?.data?.detail || "Authentication layer handshake failed.");
     }
@@ -137,8 +141,11 @@ function App() {
     localStorage.removeItem("news_pulse_session");
     localStorage.removeItem("news_pulse_user");
     setIsAuthenticated(false);
+    setCurrentPage('home');
     setArticles([]);
+    setBookmarks([]);
     setSearchHistory([]);
+    setIsSidebarOpen(false);
   };
 
   const handleSearch = async (query: any) => {
@@ -217,8 +224,8 @@ function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-news-bg px-4 py-8">
-        <div className="bg-news-card rounded-xl border border-news-border shadow-xl max-w-md w-full p-6 sm:p-8">
+      <div className="min-h-dvh flex items-center justify-center bg-news-bg px-4 py-8">
+        <div className="bg-news-card rounded-xl border border-news-border shadow-xl max-w-md sm:max-w-lg w-full p-6 sm:p-8">
           <div className="text-center mb-6">
             <div className="inline-flex p-3 bg-news-primary/10 text-news-primary rounded-xl mb-2">
               <Newspaper size={32} />
@@ -254,15 +261,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-news-bg text-news-darkText antialiased">
+    <div className="min-h-dvh flex flex-col lg:flex-row bg-news-bg text-news-darkText antialiased overflow-x-hidden">
       
-      {/* FIXED CONTEXT: Cleaned syntax condition wrapping to drop the leaky text string */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300" onClick={() => setIsSidebarOpen(false)} />
       )}
 
-      {/* COMPACT PREMIUM SIDEBAR ELEMENT */}
-      <aside className={`w-64 bg-news-sidebarBg flex flex-col fixed lg:sticky h-screen top-0 left-0 z-50 text-slate-300 transform transition-transform duration-300 ease-in-out lg:transform-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <aside className={`w-64 bg-news-sidebarBg flex flex-col fixed lg:sticky h-dvh top-0 left-0 z-50 text-slate-300 transform transition-transform duration-300 ease-in-out lg:transform-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="text-news-sidebarActive">
@@ -293,23 +298,26 @@ function App() {
           ] as const).map((item) => (
             <button
               key={item.id}
-              onClick={() => setCurrentPage(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === item.id ? 'bg-news-sidebarActive text-white shadow-lg shadow-news-sidebarActive/20 font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}`}
+              // UX FIX 1 — CLOSE SIDEBAR AFTER PAGE CHANGE
+              onClick={() => {
+                setCurrentPage(item.id);
+                setIsSidebarOpen(false);
+              }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${currentPage === item.id ? 'bg-news-sidebarActive text-white shadow-lg shadow-news-sidebarActive/20 font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}`}
             >
               {item.icon}
-              <span>{item.label}</span>
+              <span className="truncate">{item.label}</span>
             </button>
           ))}
         </nav>
         <div className="p-4 border-t border-slate-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-4 py-2 text-sm font-medium text-news-negative hover:bg-red-950/20 rounded-lg transition-colors">
             <LogOut size={18} />
-            <span>Terminate Session</span>
+            <span className="truncate">Terminate Session</span>
           </button>
         </div>
       </aside>
 
-      {/* MAIN VIEWPORT BODY CONTAINER LAYER */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full">
         
         <header className="h-16 bg-news-headerBg border-b border-news-border flex items-center px-4 sm:px-8 justify-between sticky top-0 z-30 shadow-sm">
@@ -317,7 +325,9 @@ function App() {
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 rounded-lg border border-news-border bg-news-bg lg:hidden text-news-lightText focus:bg-news-card hover:text-news-darkText outline-none">
               <Menu size={18} />
             </button>
-            <h2 className="font-bold text-base sm:text-lg text-news-darkText capitalize tracking-tight truncate max-w-[180px] sm:max-w-none">{currentPage} Dashboard</h2>
+            <h2 className="font-bold text-base sm:text-lg text-news-darkText capitalize tracking-tight truncate max-w-[140px] sm:max-w-[220px] md:max-w-none">
+              {currentPage} Dashboard
+            </h2>
           </div>
           <div className="flex items-center space-x-2 flex-shrink-0">
             <span className="h-2 w-2 rounded-full bg-news-success animate-pulse"></span>
@@ -325,7 +335,7 @@ function App() {
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8 flex-1 max-w-6xl w-full mx-auto min-w-0">
+        <main className="p-4 sm:p-6 lg:p-8 flex-1 max-w-7xl w-full mx-auto min-w-0">
           {currentPage === 'home' && (
             <div className="space-y-6 sm:space-y-8">
               <div>
@@ -339,7 +349,7 @@ function App() {
                   {searchHistory.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {searchHistory.slice(0, 6).map((log, idx) => (
-                        <div key={idx} className="bg-news-bg text-news-darkText px-2.5 py-1.5 rounded-lg border border-news-border text-xs flex items-center space-x-2 max-w-full truncate font-medium">
+                        <div key={log._id || log.id || idx} className="bg-news-bg text-news-darkText px-2.5 py-1.5 rounded-lg border border-news-border text-xs flex items-center space-x-2 max-w-full truncate font-medium">
                           <div className="text-news-neutral flex-shrink-0">
                             <FolderOpen size={12} />
                           </div>
@@ -364,13 +374,13 @@ function App() {
                   </div>
                   <h3 className="text-sm font-bold text-news-darkText uppercase tracking-wider">Latest Picks</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   {articles.length > 0 ? (
                     articles.slice(0, 5).map((art, idx) => (
-                      <ArticleCard key={idx} article={art} onBookmark={handleBookmarkToggle} isBookmarked={bookmarks.some(b => b.url === art.url)} />
+                      <ArticleCard key={art.url || idx} article={art} onBookmark={handleBookmarkToggle} isBookmarked={bookmarks.some(b => b.url === art.url)} />
                     ))
                   ) : (
-                    <div className="bg-news-card p-8 sm:p-12 text-center border border-news-border rounded-xl text-news-lightText text-xs font-medium">
+                    <div className="col-span-full bg-news-card p-8 sm:p-12 text-center border border-news-border rounded-xl text-news-lightText text-xs font-medium">
                       No search indices loaded in current workspace memory. Head to the <strong>Search Framework</strong> tab to execute data extractions.
                     </div>
                   )}
@@ -380,7 +390,7 @@ function App() {
           )}
 
           {currentPage === 'search' && (
-            <div className="space-y-6">
+            <div className="space-y-6 will-change-transform">
               <SearchPanel onSearch={handleSearch} loading={loading} defaultKeyword={prefKeywords} />
               {loading && (
                 <div className="text-center py-12">
@@ -389,11 +399,11 @@ function App() {
                 </div>
               )}
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-news-neutral px-1">Streaming Feeds</h3>
-                  {articles.map((art, idx) => (
-                    <ArticleCard key={idx} article={art} onBookmark={handleBookmarkToggle} isBookmarked={bookmarks.some(b => b.url === art.url)} />
+                  {articles.slice(0, 12).map((art, idx) => (
+                    <ArticleCard key={art.url || idx} article={art} onBookmark={handleBookmarkToggle} isBookmarked={bookmarks.some(b => b.url === art.url)} />
                   ))}
                   {!loading && articles.length === 0 && (
                     <div className="bg-news-card p-8 sm:p-12 text-center border border-news-border rounded-xl text-news-lightText text-sm">
@@ -420,9 +430,9 @@ function App() {
                 ) : (
                   <div className="space-y-4">
                     {bookmarks.map((art, idx) => (
-                      <div key={idx} className="bg-news-card p-4 sm:p-5 border border-news-border rounded-xl shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                      <div key={art.url || art._id || idx} className="bg-news-card p-4 sm:p-5 border border-news-border rounded-xl shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="min-w-0 flex-1 w-full">
-                          <a href={art.url} target="_blank" rel="noreferrer" className="font-bold text-news-darkText text-sm sm:text-base hover:text-news-primary truncate block">{art.title}</a>
+                          <a href={art.url} target="_blank" rel="noreferrer" className="font-bold text-news-darkText text-sm sm:text-base hover:text-news-primary block truncate">{art.title}</a>
                           <p className="text-xs text-news-lightText mt-1">{art.source} • {art.publishedAt}</p>
                         </div>
                         <div className="flex space-x-2 w-full sm:w-auto sm:flex-shrink-0 justify-end pt-2 sm:pt-0 border-t border-news-bg sm:border-transparent">
@@ -439,7 +449,7 @@ function App() {
 
           {currentPage === 'profile' && (
             <ProtectedRoute isAuthenticated={isAuthenticated} onRedirect={() => setIsAuthenticated(false)}>
-              <div className="bg-news-card p-5 sm:p-6 border border-news-border rounded-xl shadow-sm max-w-xl mx-auto lg:mx-0">
+              <div className="bg-news-card p-5 sm:p-6 border border-news-border rounded-xl shadow-sm max-w-2xl mx-auto lg:mx-0">
                 <h3 className="text-base font-bold text-news-darkText uppercase tracking-wider mb-4">Profile Framework</h3>
                 <div className="space-y-4">
                   <div>
@@ -462,7 +472,7 @@ function App() {
 
           {currentPage === 'preferences' && (
             <ProtectedRoute isAuthenticated={isAuthenticated} onRedirect={() => setIsAuthenticated(false)}>
-              <div className="bg-news-card p-5 sm:p-6 border border-news-border rounded-xl shadow-sm max-w-xl mx-auto lg:mx-0">
+              <div className="bg-news-card p-5 sm:p-6 border border-news-border rounded-xl shadow-sm max-w-2xl mx-auto lg:mx-0">
                 <h3 className="text-base font-bold text-news-darkText uppercase tracking-wider mb-4">System Preferences</h3>
                 <div className="space-y-4">
                   <div>

@@ -1,6 +1,8 @@
 from fastapi import Header, HTTPException, status
-from app.core.db import sessions
 from datetime import datetime
+
+from app.core.db import sessions
+
 
 async def get_current_user_id(
     authorization: str = Header(None, alias="Authorization")
@@ -28,7 +30,6 @@ async def get_current_user_id(
             detail="Invalid or expired session."
         )
 
-    # Proper datetime comparison
     expires_at = datetime.fromisoformat(session["expires_at"])
 
     if datetime.utcnow() > expires_at:

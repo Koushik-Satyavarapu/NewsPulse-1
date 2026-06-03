@@ -12,13 +12,11 @@ from app.api.news import router as news_router
 from app.api.auth import router as auth_router
 from app.api.user_actions import router as user_router
 
-# IMPORTANT:
-# Remove redirect_slashes=False completely
 app = FastAPI(
     title="NewsPulse - AI News Trend Analyzer"
 )
 
-# Stable CORS configuration
+# Stable production-safe CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
