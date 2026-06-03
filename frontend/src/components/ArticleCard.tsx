@@ -18,7 +18,6 @@ interface ArticleCardProps {
 export default function ArticleCard({ article, onBookmark, isBookmarked }: ArticleCardProps) {
   const [showDiscuss, setShowDiscuss] = useState(false);
   
-  // FIX 1 — STRICT LITERAL TYPE ATTRIBUTE INFERENCE RECTIFIED
   const [chat, setChat] = useState<{ role: 'assistant' | 'user'; text: string }[]>([
     { 
       role: 'assistant', 
@@ -45,108 +44,259 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
   const activeStyle = sentimentStyles[article.sentiment] || sentimentStyles.Neutral;
 
   return (
-    <div className="bg-news-card rounded-xl border border-news-border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row">
-      
-      {/* RESPONSIVE MEDIA PANEL WITH FALLBACK AND GPU RENDER HANDLING */}
-      <div className="w-full md:w-48 h-48 md:h-auto relative flex-shrink-0 bg-news-bg overflow-hidden border-b md:border-b-0 md:border-r border-news-border">
-        <img
-          src={article.image || 'https://placehold.co/600x400?text=NewsPulse'}
-          alt={article.title}
-          className="w-full h-full object-cover will-change-transform transform hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            e.currentTarget.src = 'https://placehold.co/600x400?text=NewsPulse';
-          }}
-        />
-      </div>
+    <div className="
+      bg-news-card
+      rounded-2xl
+      border
+      border-news-border
+      p-5
+      shadow-sm
+      hover:shadow-lg
+      transition-all
+      duration-300
+      flex
+      flex-col
+      justify-between
+      min-w-0
+      hover:border-news-primary/30
+    ">
 
-      <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0">
-        <div className="flex flex-col gap-2">
-          {/* UNIFORM BADGE MATRIX ROW */}
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={`inline-flex items-center space-x-1.5 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border ${activeStyle.badge}`}>
-              {article.sentiment === 'Negative' ? (
-                <ShieldAlert size={10} className="text-rose-500" />
-              ) : (
-                <span className={`h-1.5 w-1.5 rounded-full ${activeStyle.dot}`} />
-              )}
-              <span>{article.sentiment}</span>
-            </span>
-            <span className="text-xs font-bold text-news-darkText truncate max-w-[120px] sm:max-w-[180px]">{article.source || "General News"}</span>
-            <span className="text-news-border text-xs font-mono">•</span>
-            <span className="text-xs text-news-lightText font-mono truncate">{article.publishedAt}</span>
-          </div>
-          
-          {/* TYPOGRAPHY BLOCKS */}
-          <a href={article.url} target="_blank" rel="noreferrer" className="block font-bold text-sm sm:text-base text-news-darkText hover:text-news-primary transition-colors line-clamp-2 leading-snug">{article.title}</a>
-          <p className="text-xs text-news-lightText line-clamp-2 leading-relaxed mb-2">{article.description || "Context summary missing from feed parameters."}</p>
-        </div>
-
-        {/* ACTION BUTTON CONTROLS ROW */}
-        <div className="flex flex-col gap-3 mt-auto">
-          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-news-bg text-xs font-semibold">
-            <button 
-              onClick={() => onBookmark(article)} 
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded border transition-colors ${isBookmarked ? 'bg-news-primary/10 border-news-primary text-news-primary' : 'border-news-border text-news-lightText hover:bg-news-bg'}`}
-            >
-              <Bookmark size={14} className={isBookmarked ? "fill-news-primary" : ""} />
-              <span>{isBookmarked ? 'Saved' : 'Save'}</span>
-            </button>
-            
-            <button 
-              onClick={() => setShowDiscuss(!showDiscuss)} 
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded border transition-colors ${showDiscuss ? 'bg-news-primary/5 border-news-primary/30 text-news-primary' : 'border-news-border text-news-lightText hover:bg-news-bg'}`}
-            >
-              <MessageSquare size={14} />
-              <span>Discuss</span>
-            </button>
-            
-            {/* FIX 2 — MOBILE ACTION BUTTON WRAPPING CONTROL INTEGRATED (ml-auto -> sm:ml-auto) */}
-            <a href={article.url} target="_blank" rel="noreferrer" className="flex items-center space-x-1 text-news-primary sm:ml-auto hover:text-news-primaryHover font-bold">
-              <span>Open Link</span>
-              <ExternalLink size={12} />
-            </a>
-          </div>
-
-          {/* DISCUSSION BLOCK PANEL */}
-          {showDiscuss && (
-            <div className="bg-news-bg p-3 border border-news-border rounded-lg space-y-3 mt-1 animation-fade-in">
-              <div className="space-y-2 max-h-32 overflow-y-auto p-2 bg-news-card border border-news-border rounded-md text-xs">
-                {chat.map((msg, i) => (
-                  <div key={i} className={`p-2 rounded-lg leading-relaxed ${msg.role === 'user' ? 'bg-news-primary/10 text-news-darkText ml-6' : 'bg-news-bg text-news-lightText mr-6'}`}>
-                    <strong>{msg.role === 'user' ? 'You' : 'System'}:</strong> {msg.text}
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  value={input} 
-                  onChange={e => setInput(e.target.value)} 
-                  placeholder="Ask a question..." 
-                  className="flex-1 px-3 py-1.5 border border-news-border bg-news-card rounded-md outline-none text-xs text-news-darkText focus:border-news-primary"
-                  onKeyDown={e => { if(e.key === 'Enter') { e.preventDefault(); document.getElementById('chat-send-btn')?.click(); } }}
-                />
-                <button 
-                  id="chat-send-btn"
-                  // FIX 3 — FUNCTIONAL PREV STATE INJECTION DISPATCHER FOR RENDER STABILITY
-                  onClick={() => { 
-                    if(!input.trim()) return; 
-                    setChat(prev => [
-                      ...prev,
-                      { role: 'user', text: input },
-                      { role: 'assistant', text: `Analyzing keyword distribution mapping for "${input}".` }
-                    ]); 
-                    setInput(''); 
-                  }} 
-                  className="px-3 bg-news-primary text-white text-xs font-bold rounded-md hover:bg-news-primaryHover transition-colors"
-                >
-                  Send
-                </button>
-              </div>
-            </div>
+      {/* TOP META SECTION */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className={`inline-flex items-center space-x-1.5 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider border ${activeStyle.badge}`}>
+          {article.sentiment === 'Negative' ? (
+            <ShieldAlert size={10} className="text-rose-500" />
+          ) : (
+            <span className={`h-1.5 w-1.5 rounded-full ${activeStyle.dot}`} />
           )}
-        </div>
+          <span>{article.sentiment}</span>
+        </span>
+
+        <span className="text-xs font-bold text-news-darkText truncate">
+          {article.source || "General News"}
+        </span>
+
+        <span className="text-news-border text-xs font-mono">•</span>
+
+        <span className="text-xs text-news-lightText font-mono truncate">
+          {article.publishedAt}
+        </span>
       </div>
+
+      {/* ARTICLE CONTENT */}
+      <div className="space-y-3">
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noreferrer"
+          className="
+            block
+            font-bold
+            text-lg
+            text-news-darkText
+            hover:text-news-primary
+            transition-colors
+            leading-snug
+            line-clamp-2
+          "
+        >
+          {article.title}
+        </a>
+
+        <p className="
+          text-sm
+          text-news-lightText
+          leading-relaxed
+          line-clamp-3
+        ">
+          {article.description || "Context summary unavailable."}
+        </p>
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="
+        flex
+        flex-wrap
+        items-center
+        gap-3
+        pt-4
+        mt-5
+        border-t
+        border-news-border
+      ">
+        <button
+          onClick={() => onBookmark(article)}
+          className={`
+            flex
+            items-center
+            gap-2
+            px-3
+            py-2
+            rounded-xl
+            border
+            text-sm
+            font-semibold
+            transition-all
+            min-h-[42px]
+            ${isBookmarked
+              ? 'bg-news-primary/10 border-news-primary text-news-primary'
+              : 'border-news-border text-news-lightText hover:bg-news-bg'}
+          `}
+        >
+          <Bookmark
+            size={15}
+            className={isBookmarked ? "fill-news-primary" : ""}
+          />
+          <span>
+            {isBookmarked ? 'Saved' : 'Save'}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setShowDiscuss(!showDiscuss)}
+          className={`
+            flex
+            items-center
+            gap-2
+            px-3
+            py-2
+            rounded-xl
+            border
+            text-sm
+            font-semibold
+            transition-all
+            min-h-[42px]
+            ${showDiscuss
+              ? 'bg-news-primary/5 border-news-primary/30 text-news-primary'
+              : 'border-news-border text-news-lightText hover:bg-news-bg'}
+          `}
+        >
+          <MessageSquare size={15} />
+          <span>Discuss</span>
+        </button>
+
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noreferrer"
+          className="
+            flex
+            items-center
+            gap-1
+            text-news-primary
+            sm:ml-auto
+            hover:text-news-primaryHover
+            font-bold
+            text-sm
+          "
+        >
+          <span>Open Link</span>
+          <ExternalLink size={14} />
+        </a>
+      </div>
+
+      {/* DISCUSSION PANEL */}
+      {showDiscuss && (
+        <div className="
+          bg-news-bg
+          p-4
+          border
+          border-news-border
+          rounded-xl
+          space-y-3
+          mt-4
+          animate-fade-in
+        ">
+          <div className="
+            space-y-2
+            max-h-40
+            overflow-y-auto
+            p-2
+            bg-news-card
+            border
+            border-news-border
+            rounded-lg
+            text-xs
+          ">
+            {chat.map((msg, i) => (
+              <div
+                key={i}
+                className={`
+                  p-2
+                  rounded-lg
+                  leading-relaxed
+                  ${msg.role === 'user'
+                    ? 'bg-news-primary/10 text-news-darkText ml-6'
+                    : 'bg-news-bg text-news-lightText mr-6'}
+                `}
+              >
+                <strong>
+                  {msg.role === 'user' ? 'You' : 'System'}:
+                </strong>{' '}
+                {msg.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Ask a question..."
+              className="
+                flex-1
+                px-3
+                py-2
+                border
+                border-news-border
+                bg-news-card
+                rounded-lg
+                outline-none
+                text-sm
+                text-news-darkText
+                focus:border-news-primary
+              "
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  document.getElementById('card-chat-send-btn')?.click();
+                }
+              }}
+            />
+
+            <button
+              id="card-chat-send-btn"
+              onClick={() => {
+                if (!input.trim()) return;
+
+                setChat(prev => [
+                  ...prev,
+                  { role: 'user', text: input },
+                  {
+                    role: 'assistant',
+                    text: `Analyzing keyword distribution mapping for "${input}".`
+                  }
+                ]);
+
+                setInput('');
+              }}
+              className="
+                px-4
+                bg-news-primary
+                text-white
+                text-sm
+                font-bold
+                rounded-lg
+                hover:bg-news-primaryHover
+                transition-colors
+              "
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
