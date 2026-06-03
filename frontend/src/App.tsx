@@ -260,56 +260,48 @@ function App() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col lg:flex-row bg-news-bg text-news-darkText antialiased overflow-x-hidden">
+    <div className="min-h-dvh flex flex-col bg-news-bg text-news-darkText antialiased overflow-x-hidden">
       
+      {/* STEP 3 — BACKDROP OVERLAY WITH IMPROVED SAAS BLUR */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300" onClick={() => setIsSidebarOpen(false)} />
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
       )}
 
-      {/* FIXED ASIDE CLASS: COMPACT FLOATING HOVER INTERACTION LAYOUT */}
+      {/* STEP 1 — CLEAN FLOATING OVERLAY SIDEBAR DESIGN FOR ALL VIEWPORTS */}
       <aside className={`
-        bg-news-sidebarBg
-        flex
-        flex-col
         fixed
-        lg:sticky
-        h-dvh
         top-0
         left-0
+        h-dvh
+        w-72
+        bg-news-sidebarBg/95
+        backdrop-blur-xl
+        border-r
+        border-news-border
         z-50
         text-slate-300
         transform
-        transition-all
+        transition-transform
         duration-300
         ease-in-out
-        overflow-hidden
-        w-64
-        lg:w-20
-        lg:hover:w-64
-        group
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        shadow-2xl
+        flex
+        flex-col
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3 min-w-0">
             <div className="text-news-sidebarActive flex-shrink-0">
               <Newspaper size={24} />
             </div>
-            {/* FIXED TITLE VISIBILITY WRAPPER */}
-            <span className="
-              font-bold 
-              text-lg 
-              text-white 
-              tracking-tight 
-              truncate
-              lg:opacity-0
-              lg:group-hover:opacity-100
-              transition-opacity
-              duration-200
-            ">
+            <span className="font-bold text-lg text-white tracking-tight truncate">
               News Pulse
             </span>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white lg:hidden p-1 rounded-md hover:bg-slate-800 outline-none">
+          <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 outline-none">
             <X size={18} />
           </button>
         </div>
@@ -318,7 +310,7 @@ function App() {
           <div className="text-slate-400 flex-shrink-0 pl-1">
             <User size={16} />
           </div>
-          <div className="min-w-0 flex-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] text-news-neutral font-bold uppercase tracking-wider leading-none">Analyst Session</p>
             <p className="text-xs font-semibold text-slate-200 truncate mt-0.5">{username}</p>
           </div>
@@ -334,6 +326,7 @@ function App() {
           ] as const).map((item) => (
             <button
               key={item.id}
+              // STEP 5 — AUTO CLOSE ON NAVIGATION REIFIED
               onClick={() => {
                 setCurrentPage(item.id);
                 setIsSidebarOpen(false);
@@ -341,16 +334,7 @@ function App() {
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${currentPage === item.id ? 'bg-news-sidebarActive text-white shadow-lg shadow-news-sidebarActive/20 font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}`}
             >
               <div className="flex-shrink-0 pl-0.5">{item.icon}</div>
-              {/* FIXED LABEL OPACITY TRUNCATION WRAPPER */}
-              <span className="
-                truncate
-                lg:opacity-0
-                lg:group-hover:opacity-100
-                transition-opacity
-                duration-200
-              ">
-                {item.label}
-              </span>
+              <span className="truncate">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -358,20 +342,12 @@ function App() {
         <div className="p-4 border-t border-slate-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-4 py-2 text-sm font-medium text-news-negative hover:bg-red-950/20 rounded-lg transition-colors">
             <div className="flex-shrink-0 pl-0.5"><LogOut size={18} /></div>
-            <span className="
-              truncate
-              lg:opacity-0
-              lg:group-hover:opacity-100
-              transition-opacity
-              duration-200
-            ">
-              Terminate Session
-            </span>
+            <span className="truncate">Terminate Session</span>
           </button>
         </div>
       </aside>
 
-      {/* FIXED MAIN WRAPPER COMPONENT REGION TRANSITION LAYER */}
+      {/* STEP 2 — FULL WIDTH MAIN CONTENT WRAPPING VECTOR LAYOUT */}
       <div className="
         flex-1
         flex
@@ -385,7 +361,23 @@ function App() {
         
         <header className="h-16 bg-news-headerBg border-b border-news-border flex items-center px-4 sm:px-8 justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 rounded-lg border border-news-border bg-news-bg lg:hidden text-news-lightText focus:bg-news-card hover:text-news-darkText outline-none">
+            {/* STEP 4 — ROBUST RECONFIGURED MENU TRIGGER BUTTON */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="
+                p-2.5
+                rounded-xl
+                border
+                border-news-border
+                bg-news-card
+                hover:bg-news-bg
+                transition-all
+                shadow-sm
+                text-news-lightText
+                hover:text-news-darkText
+                outline-none
+              "
+            >
               <Menu size={18} />
             </button>
             <h2 className="font-bold text-base sm:text-lg text-news-darkText capitalize tracking-tight truncate max-w-[140px] sm:max-w-[220px] md:max-w-none">
