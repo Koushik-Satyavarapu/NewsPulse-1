@@ -90,7 +90,6 @@ function App() {
     setIsSidebarOpen(false);
   }, [currentPage]);
 
-  // UX FIX 2 — AUTO-SCROLL TO TOP ON PAGE CHANGE
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -267,27 +266,64 @@ function App() {
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300" onClick={() => setIsSidebarOpen(false)} />
       )}
 
-      <aside className={`w-64 bg-news-sidebarBg flex flex-col fixed lg:sticky h-dvh top-0 left-0 z-50 text-slate-300 transform transition-transform duration-300 ease-in-out lg:transform-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      {/* FIXED ASIDE CLASS: COMPACT FLOATING HOVER INTERACTION LAYOUT */}
+      <aside className={`
+        bg-news-sidebarBg
+        flex
+        flex-col
+        fixed
+        lg:sticky
+        h-dvh
+        top-0
+        left-0
+        z-50
+        text-slate-300
+        transform
+        transition-all
+        duration-300
+        ease-in-out
+        overflow-hidden
+        w-64
+        lg:w-20
+        lg:hover:w-64
+        group
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="text-news-sidebarActive">
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className="text-news-sidebarActive flex-shrink-0">
               <Newspaper size={24} />
             </div>
-            <span className="font-bold text-lg text-white tracking-tight">News Pulse</span>
+            {/* FIXED TITLE VISIBILITY WRAPPER */}
+            <span className="
+              font-bold 
+              text-lg 
+              text-white 
+              tracking-tight 
+              truncate
+              lg:opacity-0
+              lg:group-hover:opacity-100
+              transition-opacity
+              duration-200
+            ">
+              News Pulse
+            </span>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white lg:hidden p-1 rounded-md hover:bg-slate-800 outline-none">
             <X size={18} />
           </button>
         </div>
-        <div className="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center space-x-2.5">
-          <div className="text-slate-400">
+        
+        <div className="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center space-x-2.5 min-w-0">
+          <div className="text-slate-400 flex-shrink-0 pl-1">
             <User size={16} />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
             <p className="text-[10px] text-news-neutral font-bold uppercase tracking-wider leading-none">Analyst Session</p>
             <p className="text-xs font-semibold text-slate-200 truncate mt-0.5">{username}</p>
           </div>
         </div>
+        
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {([
             { id: 'home', label: 'Home Portal', icon: <Home size={18} /> },
@@ -298,27 +334,54 @@ function App() {
           ] as const).map((item) => (
             <button
               key={item.id}
-              // UX FIX 1 — CLOSE SIDEBAR AFTER PAGE CHANGE
               onClick={() => {
                 setCurrentPage(item.id);
                 setIsSidebarOpen(false);
               }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${currentPage === item.id ? 'bg-news-sidebarActive text-white shadow-lg shadow-news-sidebarActive/20 font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}`}
             >
-              {item.icon}
-              <span className="truncate">{item.label}</span>
+              <div className="flex-shrink-0 pl-0.5">{item.icon}</div>
+              {/* FIXED LABEL OPACITY TRUNCATION WRAPPER */}
+              <span className="
+                truncate
+                lg:opacity-0
+                lg:group-hover:opacity-100
+                transition-opacity
+                duration-200
+              ">
+                {item.label}
+              </span>
             </button>
           ))}
         </nav>
+        
         <div className="p-4 border-t border-slate-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-4 py-2 text-sm font-medium text-news-negative hover:bg-red-950/20 rounded-lg transition-colors">
-            <LogOut size={18} />
-            <span className="truncate">Terminate Session</span>
+            <div className="flex-shrink-0 pl-0.5"><LogOut size={18} /></div>
+            <span className="
+              truncate
+              lg:opacity-0
+              lg:group-hover:opacity-100
+              transition-opacity
+              duration-200
+            ">
+              Terminate Session
+            </span>
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full">
+      {/* FIXED MAIN WRAPPER COMPONENT REGION TRANSITION LAYER */}
+      <div className="
+        flex-1
+        flex
+        flex-col
+        min-h-screen
+        min-w-0
+        w-full
+        transition-all
+        duration-300
+      ">
         
         <header className="h-16 bg-news-headerBg border-b border-news-border flex items-center px-4 sm:px-8 justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center space-x-3">
