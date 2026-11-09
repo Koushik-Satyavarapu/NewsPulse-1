@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { MessageSquare, Bookmark, ExternalLink, ShieldAlert } from 'lucide-react';
+import { MessageSquare, Bookmark, ExternalLink, ShieldAlert, Sparkles, Loader2 } from 'lucide-react';
+import { summarizeArticle, askArticleQuestion } from '../services/api';
 
 interface ArticleCardProps {
   article: { 
@@ -17,14 +18,17 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ article, onBookmark, isBookmarked }: ArticleCardProps) {
   const [showDiscuss, setShowDiscuss] = useState(false);
-  
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
   const [chat, setChat] = useState<{ role: 'assistant' | 'user'; text: string }[]>([
     { 
       role: 'assistant', 
-      text: 'Telemetry linked. Would you like an extraction summary of this node?' 
+      text: 'Ask me anything about this article headline and context.' 
     }
   ]);
   const [input, setInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
 
   const sentimentStyles = {
     Positive: {
@@ -42,6 +46,39 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
   };
 
   const activeStyle = sentimentStyles[article.sentiment] || sentimentStyles.Neutral;
+
+  const handleSummarize = async () => {
+    if (summary) {
+      setSummary(null); // Toggle off
+      return;
+    }
+    setSummaryLoading(true);
+    try {
+      const data = await summarizeArticle(article.title, article.description);
+      setSummary(data.summary);
+    } catch {
+      setSummary("Failed to generate AI summary. Check backend API key configuration.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleSendChat = async () => {
+    if (!input.trim() || chatLoading) return;
+    const userQuestion = input.trim();
+    setInput('');
+    setChat(prev => [...prev, { role: 'user', text: userQuestion }]);
+    setChatLoading(true);
+
+    try {
+      const data = await askArticleQuestion(article.title, article.description, userQuestion);
+      setChat(prev => [...prev, { role: 'assistant', text: data.answer }]);
+    } catch {
+      setChat(prev => [...prev, { role: 'assistant', text: "Service temporarily unavailable. Please try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   return (
     <div className="
@@ -111,6 +148,17 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
         ">
           {article.description || "Context summary unavailable."}
         </p>
+
+        {/* AI SUMMARY BLOCK */}
+        {summary && (
+          <div className="bg-news-primary/5 border border-news-primary/20 p-3.5 rounded-xl text-xs space-y-1.5">
+            <div className="flex items-center space-x-1.5 font-bold text-news-primary">
+              <Sparkles size={13} />
+              <span>AI Executive Summary</span>
+            </div>
+            <p className="text-news-darkText whitespace-pre-line leading-relaxed">{summary}</p>
+          </div>
+        )}
       </div>
 
       {/* ACTION BUTTONS */}
@@ -147,9 +195,31 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
             size={15}
             className={isBookmarked ? "fill-news-primary" : ""}
           />
-          <span>
-            {isBookmarked ? 'Saved' : 'Save'}
-          </span>
+          <span>{isBookmarked ? 'Saved' : 'Save'}</span>
+        </button>
+
+        <button
+          onClick={handleSummarize}
+          disabled={summaryLoading}
+          className={`
+            flex
+            items-center
+            gap-1.5
+            px-3
+            py-2
+            rounded-xl
+            border
+            text-sm
+            font-semibold
+            transition-all
+            min-h-[42px]
+            ${summary
+              ? 'bg-purple-500/10 border-purple-500 text-purple-600'
+              : 'border-news-border text-news-lightText hover:bg-news-bg'}
+          `}
+        >
+          {summaryLoading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+          <span>{summary ? 'Hide Summary' : 'AI Summary'}</span>
         </button>
 
         <button
@@ -172,7 +242,7 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
           `}
         >
           <MessageSquare size={15} />
-          <span>Discuss</span>
+          <span>Ask AI</span>
         </button>
 
         <a
@@ -205,11 +275,10 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
           rounded-xl
           space-y-3
           mt-4
-          animate-fade-in
         ">
           <div className="
             space-y-2
-            max-h-40
+            max-h-48
             overflow-y-auto
             p-2
             bg-news-card
@@ -231,11 +300,17 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
                 `}
               >
                 <strong>
-                  {msg.role === 'user' ? 'You' : 'System'}:
+                  {msg.role === 'user' ? 'You' : 'NewsPulse AI'}:
                 </strong>{' '}
                 {msg.text}
               </div>
             ))}
+            {chatLoading && (
+              <div className="flex items-center space-x-2 text-news-lightText p-2 text-xs">
+                <Loader2 size={13} className="animate-spin text-news-primary" />
+                <span>Thinking...</span>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -243,7 +318,8 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Ask a question..."
+              placeholder="Ask a question about this article..."
+              disabled={chatLoading}
               className="
                 flex-1
                 px-3
@@ -256,31 +332,19 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
                 text-sm
                 text-news-darkText
                 focus:border-news-primary
+                disabled:opacity-50
               "
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  document.getElementById('card-chat-send-btn')?.click();
+                  handleSendChat();
                 }
               }}
             />
 
             <button
-              id="card-chat-send-btn"
-              onClick={() => {
-                if (!input.trim()) return;
-
-                setChat(prev => [
-                  ...prev,
-                  { role: 'user', text: input },
-                  {
-                    role: 'assistant',
-                    text: `Analyzing keyword distribution mapping for "${input}".`
-                  }
-                ]);
-
-                setInput('');
-              }}
+              onClick={handleSendChat}
+              disabled={chatLoading || !input.trim()}
               className="
                 px-4
                 bg-news-primary
@@ -289,6 +353,7 @@ export default function ArticleCard({ article, onBookmark, isBookmarked }: Artic
                 font-bold
                 rounded-lg
                 hover:bg-news-primaryHover
+                disabled:opacity-50
                 transition-colors
               "
             >
